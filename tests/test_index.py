@@ -9,7 +9,7 @@ from trialproject.lib import InvalidUrlException
 
 def test_env_variables():
     """ make sure certain environment variables are set """
-    assert os.environ.get('S3_BUCKET') is not None
+    assert os.environ.get('s3_bucket') is not None
 
 
 def test_handle_url_args():
