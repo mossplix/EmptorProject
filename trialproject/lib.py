@@ -2,12 +2,39 @@
 
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
+import boto3
 import requests
+from botocore.exceptions import ClientError
 
 
 class InvalidUrlException(Exception):
     "returned when the url is invalid"
     pass
+
+
+class DynamoRepository:
+    def __init__(self, table_name):
+        self.client = resource('dynamodb')
+        self.table_name = table_name
+        self.table = self.client.Table(table_name)
+
+    def query_by_key(self, key):
+        response = self.table.query(
+            KeyConditionExpression=Key("id").eq(key))
+        [toret] = response.get('Items')
+        return toret
+
+    def put_item(self, key, title="", url="", s3Url="", state="PENDING"):
+
+        response = self.table.put_item(
+            Item={'id': key,
+                  'title': title,
+                  'url': url,
+                  's3Url': s3Url,
+                  'state': state
+                  }
+        )
+        return response
 
 
 def get_title(html):
@@ -37,3 +64,21 @@ def fetch_url(url):
         response = session.get(
             url, verify=False)
         return response.content
+
+
+def get_s3object_url(key, bucket):
+    return 'https://%s.s3.amazonaws.com/%s' % (bucket, key)
+
+
+def s3bucket_put(key, item, bucket):
+    s3_client = boto3.client('s3')
+    if isinstance(item, str):
+        item = item.encode()
+    try:
+        s3_client.put_object(Body=item, Bucket=bucket, Key=key)
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'EntityAlreadyExists':
+            print("item already exists")
+        else:
+            print("Unexpected error: %s" % e)
+    return True

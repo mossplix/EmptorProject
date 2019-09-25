@@ -5,7 +5,7 @@ provider:
   runtime: python3.7
   region: ${env:AWS_DEFAULT_REGION}
   environment:
-    S3_BUCKET: ${env:s3_bucket}
+    s3_bucket: ${env:s3_bucket}
 
   iamRoleStatements:
     - Effect: Allow
