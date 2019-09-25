@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
+
 import json
+from urllib.parse import urlparse
 
 
-def hello(event, context):
+def handle_url(event, context):
     body = {
         "message": "Go Serverless v1.0! Your function executed successfully!",
         "input": event
@@ -14,12 +16,3 @@ def hello(event, context):
     }
 
     return response
-
-    # Use this code if you don't use the http event with the LAMBDA-PROXY
-    # integration
-    """
-    return {
-        "message": "Go Serverless v1.0! Your function executed successfully!",
-        "event": event
-    }
-    """
