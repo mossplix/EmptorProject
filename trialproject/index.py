@@ -1,21 +1,17 @@
 #!/usr/bin/env python3
 
-import json
-from .lib import validate_url
+
+from .lib import validate_url, fetch_url, get_title
 
 
 def handle_url(event, context):
 
     url = validate_url(event)
-
-    body = {
-        "message": "Go Serverless v1.0! Your function executed successfully!",
-        "input": event
-    }
-
+    content = fetch_url(url)
+    title = get_title(content)
     response = {
         "statusCode": 200,
-        "body": json.dumps(body)
+        "body": title
     }
 
     return response

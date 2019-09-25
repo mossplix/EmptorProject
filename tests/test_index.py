@@ -10,11 +10,21 @@ def test_handle_url_args():
     """handle url should take take 2 arguments"""
 
     with pytest.raises(TypeError):
-        res = handle_url()
+        handle_url()
 
 
 def test_handle_url_invalid_url():
     """handle url should take a valid url"""
 
     with pytest.raises(InvalidUrlException):
-        res = handle_url("", {})
+        handle_url("", {})
+
+
+def test_handle_url():
+    valid_url = "https://www.google.com"
+    invalid_url = ""
+    valid_response = handle_url(valid_url, {})
+    assert valid_response["body"] == "Google"
+
+    with pytest.raises(InvalidUrlException):
+        handle_url(invalid_url, {})
