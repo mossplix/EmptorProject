@@ -35,22 +35,33 @@ def handle_url(event, context):
     elif isinstance(event, dict):
         if event.get("Records"):
             for record in event['Records']:
-                payload = record["body"]
+                if record["eventName"] == "INSERT":
+                    item = record["dynamodb"]["NewImage"]
+                    logger.info('processing item: %s', item)
 
-                logger.info('processing record: %s', payload)
-                item = repo.query_by_key(payload)
-                res = process_url(item["url"])
+                    url = item["url"]["S"]
 
-                repo.put_item(item["id"], res["title"],
-                              item["url"], res["s3url"], "PROCESSED")
+                    res = process_url(url)
 
-                client = boto3.client('sqs')
-                sqsAddress = client.get_queue_url(QueueName='WriteSQS')
+                    repo.put_item(item["id"]["S"], res["title"],
+                                  url, res["s3url"], "PROCESSED")
+                elif record.get("body"):
+                    payload = record["body"]
 
-                msgUrl = sqsAddress['QueueUrl']
+                    logger.info('processing record: %s', payload)
+                    item = repo.query_by_key(payload)
+                    res = process_url(item["url"])
 
-                client.delete_message(QueueUrl=msgUrl,
-                                      ReceiptHandle=record["receiptHandle"])
+                    repo.put_item(item["id"], res["title"],
+                                  item["url"], res["s3url"], "PROCESSED")
+
+                    client = boto3.client('sqs')
+                    sqsAddress = client.get_queue_url(QueueName='WriteSQS')
+
+                    msgUrl = sqsAddress['QueueUrl']
+
+                    client.delete_message(QueueUrl=msgUrl,
+                                          ReceiptHandle=record["receiptHandle"])
 
 
 def queryByKey(key):
