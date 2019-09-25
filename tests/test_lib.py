@@ -2,8 +2,10 @@
 import pytest
 import uuid
 import os
+import mock
 from trialproject.lib import InvalidUrlException, validate_url,\
-    get_title, fetch_url, get_s3object_url, s3bucket_put, DynamoRepository
+    get_title, fetch_url, get_s3object_url, s3bucket_put, DynamoRepository,\
+    send_sqs_message
 
 
 def test_validate_url():
@@ -25,7 +27,16 @@ def test_get_title():
     assert res == "Hello World"
 
 
-def test_fetch_url():
+def mock_fetch_url(*args, **kwargs):
+    return """
+    <html><head><title>Google</title>
+    </head></html>
+
+    """
+
+
+@mock.patch('trialproject.lib.fetch_url', side_effect=mock_fetch_url)
+def test_fetch_url(mock_fetch_url):
     """test url fetching"""
 
     valid_url = "https://www.google.com"
@@ -35,13 +46,23 @@ def test_fetch_url():
     assert b"google" in res
 
 
-def test_bucket_put_and_get():
+def mock_s3_put(*args, **kwargs):
+    return True
+
+
+def mock_send_sqs_message(*args, **kwargs):
+    return True
+
+
+@mock.patch('trialproject.lib.s3bucket_put', side_effect=mock_s3_put)
+def test_bucket_put_and_get(mock_s3_put):
     """
       test s3 operations
     """
     key = str(uuid.uuid4())
     bucket = os.environ.get('s3_bucket')
     item = ""
+
     assert bucket is not None
     response1 = s3bucket_put(key, item, bucket)
     assert response1 is not None
@@ -56,3 +77,11 @@ def test_dynamo_repository():
     """
     repo = DynamoRepository("foo")
     assert repo is not None
+
+
+@mock.patch('trialproject.lib.send_sqs_message',
+            side_effect=mock_send_sqs_message)
+def test_send_sqs_message(mock_send_sqs_message):
+
+    res = send_sqs_message("test")
+    assert res is not None
