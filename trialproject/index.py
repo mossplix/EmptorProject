@@ -51,3 +51,12 @@ def handle_url(event, context):
 
                 client.delete_message(QueueUrl=msgUrl,
                                       ReceiptHandle=record["receiptHandle"])
+
+
+def queryByKey(key):
+    """
+     query dynamo table by key
+    """
+    table_name = os.environ.get('dynamo_table')
+    repo = DynamoRepository(table_name)
+    return repo.query_by_key(key)
