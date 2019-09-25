@@ -91,4 +91,4 @@ def s3bucket_put(key, item, bucket):
 
 
 def get_key():
-    return str(uuid.uuid4)
+    return str(uuid.uuid4())
