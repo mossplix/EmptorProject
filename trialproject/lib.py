@@ -3,8 +3,10 @@
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import boto3
+import json
 import uuid
 import requests
+import os
 from botocore.exceptions import ClientError
 
 from boto3.dynamodb.conditions import Key, Attr
@@ -28,7 +30,7 @@ class DynamoRepository:
         [toret] = response.get('Items')
         return toret
 
-    def put_item(self, key, title="", url="", s3Url="", state="PENDING"):
+    def put_item(self, key, title="None", url="None", s3Url="None", state="PENDING"):
 
         try:
             response = self.table.put_item(
@@ -102,3 +104,12 @@ def send_sqs_message(message):
         QueueUrl=msgUrl, MessageBody=message)
 
     return response
+
+
+def process_url(url):
+    content = fetch_url(url)
+    bucket = os.environ.get('s3_bucket')
+    key = get_key()
+    title = get_title(content)
+    s3bucket_put(key, title, bucket)
+    return {"title": title, "s3url": get_s3object_url(bucket, key), "state": "PROCESSED"}

@@ -5,7 +5,7 @@ import os
 import mock
 from trialproject.lib import InvalidUrlException, validate_url,\
     get_title, fetch_url, get_s3object_url, s3bucket_put, DynamoRepository,\
-    send_sqs_message
+    send_sqs_message, process_url
 
 
 def test_validate_url():
@@ -84,4 +84,11 @@ def test_dynamo_repository():
 def test_send_sqs_message(mock_send_sqs_message):
 
     res = send_sqs_message("test")
+    assert res is not None
+
+
+def test_process_url():
+    valid_url = "https://www.google.com"
+
+    res = process_url(valid_url)
     assert res is not None
