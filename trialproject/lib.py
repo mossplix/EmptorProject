@@ -95,4 +95,10 @@ def get_key():
 
 
 def send_sqs_message(message):
-    return True
+    client = boto3.client('sqs')
+    sqsAddress = client.get_queue_url(QueueName='WriteSQS')
+    msgUrl = sqsAddress['QueueUrl']
+    response = client.send_message(
+        QueueUrl=msgUrl, MessageBody=message)
+
+    return response

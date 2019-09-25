@@ -3,7 +3,8 @@ import os
 import uuid
 
 from .lib import validate_url, fetch_url, get_title, \
-    s3bucket_put, get_key, get_s3object_url, DynamoRepository
+    s3bucket_put, get_key, get_s3object_url, DynamoRepository,\
+    send_sqs_message
 
 import logging
 logger = logging.getLogger()
@@ -19,18 +20,15 @@ def handle_url(event, context):
     content = fetch_url(url)
     title = get_title(content)
 
-    s3bucket_put(key, title, bucket)
-    s3url = get_s3object_url(key, bucket)
+    send_sqs_message(key)
 
     repo = DynamoRepository(table_name)
-    repo.put_item(key, title,
-                  url, s3url, "PROCESSED")
+    repo.put_item(key=key,
+                  url=url, state="PENDING")
 
     response = {
         "statusCode": 200,
-        "title": title,
-        "s3url": s3url,
-        "url": url
+        "key": key
     }
 
     return response
