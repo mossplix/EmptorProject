@@ -46,6 +46,14 @@ functions:
             Fn::GetAtt:
               - WriteSQS
               - Arn
+      - stream:
+          type: dynamodb
+          batchSize: 1
+          startingPosition: LATEST
+          arn:
+            Fn::GetAtt:
+              - WebsitesDynamoDbTable
+              - StreamArn
 
 plugins:
   - serverless-python-requirements
