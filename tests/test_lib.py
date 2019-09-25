@@ -3,7 +3,7 @@ import pytest
 import uuid
 import os
 from trialproject.lib import InvalidUrlException, validate_url,\
-    get_title, fetch_url, get_s3object_url, s3bucket_put
+    get_title, fetch_url, get_s3object_url, s3bucket_put, DynamoRepository
 
 
 def test_validate_url():
@@ -36,6 +36,9 @@ def test_fetch_url():
 
 
 def test_bucket_put_and_get():
+    """
+      test s3 operations
+    """
     key = str(uuid.uuid4())
     bucket = os.environ.get('s3_bucket')
     item = ""
@@ -45,3 +48,11 @@ def test_bucket_put_and_get():
 
     response2 = get_s3object_url(key, bucket)
     assert response2 is not None
+
+
+def test_dynamo_repository():
+    """
+      smoke test dynamo repossitory
+    """
+    repo = DynamoRepository("foo")
+    assert repo is not None

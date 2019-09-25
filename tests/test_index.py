@@ -30,7 +30,9 @@ def test_handle_url():
     valid_url = "https://www.google.com"
     invalid_url = ""
     valid_response = handle_url(valid_url, {})
-    assert valid_response["body"] == "Google"
+    assert valid_response["title"] == "Google"
+
+    assert len(valid_response.keys()) == 4
 
     with pytest.raises(InvalidUrlException):
         handle_url(invalid_url, {})

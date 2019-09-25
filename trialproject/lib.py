@@ -3,8 +3,12 @@
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import boto3
+import uuid
 import requests
 from botocore.exceptions import ClientError
+
+from boto3.dynamodb.conditions import Key, Attr
+from boto3 import resource
 
 
 class InvalidUrlException(Exception):
@@ -26,15 +30,17 @@ class DynamoRepository:
 
     def put_item(self, key, title="", url="", s3Url="", state="PENDING"):
 
-        response = self.table.put_item(
-            Item={'id': key,
-                  'title': title,
-                  'url': url,
-                  's3Url': s3Url,
-                  'state': state
-                  }
-        )
-        return response
+        try:
+            response = self.table.put_item(
+                Item={'id': key,
+                      'title': title,
+                      'url': url,
+                      's3Url': s3Url,
+                      'state': state
+                      }
+            )
+        except ClientError as e:
+            print("Unexpected error: %s" % e)
 
 
 def get_title(html):
@@ -82,3 +88,7 @@ def s3bucket_put(key, item, bucket):
         else:
             print("Unexpected error: %s" % e)
     return True
+
+
+def get_key():
+    return str(uuid.uuid4)

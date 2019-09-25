@@ -6,6 +6,7 @@ provider:
   region: ${env:AWS_DEFAULT_REGION}
   environment:
     s3_bucket: ${env:s3_bucket}
+    dynamo_table: ${env:dynamo_table}
 
   iamRoleStatements:
     - Effect: Allow
@@ -15,6 +16,19 @@ provider:
         - s3:PutObject
         - s3:PutObjectAcl
       Resource: "arn:aws:s3:::${env:s3_bucket}/*"
+
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:ListStreams
+      Resource:
+        - "Fn::GetAtt": ["WebsitesDynamoDbTable", "Arn"]
 
 functions:
   handle_url:
@@ -40,3 +54,19 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${env:s3_bucket}
+
+    WebsitesDynamoDbTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${env:dynamo_table}
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
