@@ -2,8 +2,14 @@
 """Test index file"""
 
 import pytest
+import os
 from trialproject.index import handle_url
 from trialproject.lib import InvalidUrlException
+
+
+def test_env_variables():
+    """ make sure certain environment variables are set """
+    assert os.environ.get('S3_BUCKET') is not None
 
 
 def test_handle_url_args():

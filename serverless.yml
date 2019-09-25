@@ -3,6 +3,18 @@ service: EmptorTrialProject
 provider:
   name: aws
   runtime: python3.7
+  region: ${env:AWS_DEFAULT_REGION}
+  environment:
+    S3_BUCKET: ${env:s3_bucket}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+        - s3:GetObjectAcl
+        - s3:PutObject
+        - s3:PutObjectAcl
+      Resource: "arn:aws:s3:::${env:s3_bucket}/*"
 
 functions:
   handle_url:
@@ -10,11 +22,21 @@ functions:
 
 plugins:
   - serverless-python-requirements
-
+# Override args are: .. defaults:
+# --s3_bucket           websites-bucket-11456
+# --region              us-east-2
 custom:
+  region: ${opt:region, self:provider.region}
   pythonRequirements:
     dockerizePip: non-linux
 
 package:
   exclude:
     - node_modules/**
+
+resources:
+  Resources:
+    WebsiteBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${env:s3_bucket}
