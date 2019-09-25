@@ -9,13 +9,28 @@
 pip install -r requirements.txt
 npm install
 serverless deploy
+
 ```
 
-# first Version
+# config
 
-First version is at
+make sure you have the environment variables s3_bucket,dynamo_table are set
+
+```
+export s3_bucket="your_bucket_name"
+
+export dynamo_table="your table name"
+```
+
+# first version
 
 https://github.com/mossplix/EmptorProject/tree/firstVersion
+
+# second version
+
+https://github.com/mossplix/EmptorProject/tree/secondVersion
+
+# running
 
 ```
 serverless invoke -f handle_url  -d 'https://github.com' -l
