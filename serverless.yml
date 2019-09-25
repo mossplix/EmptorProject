@@ -30,15 +30,27 @@ provider:
       Resource:
         - "Fn::GetAtt": ["WebsitesDynamoDbTable", "Arn"]
 
+    - Effect: "Allow"
+      Action:
+        - "sqs:SendMessage"
+        - "sqs:GetQueueUrl"
+      Resource:
+        - arn:aws:sqs:#{AWS::Region}:#{AWS::AccountId}:WriteSQS
+
 functions:
   handle_url:
     handler: trialproject.index.handle_url
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - WriteSQS
+              - Arn
 
 plugins:
   - serverless-python-requirements
-# Override args are: .. defaults:
-# --s3_bucket           websites-bucket-11456
-# --region              us-east-2
+  - serverless-pseudo-parameters
+
 custom:
   region: ${opt:region, self:provider.region}
   pythonRequirements:
@@ -70,3 +82,8 @@ resources:
         TableName: ${env:dynamo_table}
         StreamSpecification:
           StreamViewType: NEW_IMAGE
+
+    WriteSQS:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: "WriteSQS"
