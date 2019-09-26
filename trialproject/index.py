@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 import os
-import uuid
-import json
 
-from .lib import validate_url, fetch_url, get_title, \
-    s3bucket_put, get_key, get_s3object_url, DynamoRepository,\
+from .lib import validate_url, get_key, DynamoRepository,\
     send_sqs_message, process_url
 
 import logging
+import boto3
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -17,11 +15,7 @@ def handle_url(event, context):
     repo = DynamoRepository(table_name)
     if isinstance(event, str):
         key = get_key()
-
         url = validate_url(event)
-        content = fetch_url(url)
-        title = get_title(content)
-
         send_sqs_message(key)
         repo.put_item(key=key,
                       url=url, state="PENDING")
@@ -60,8 +54,9 @@ def handle_url(event, context):
 
                     msgUrl = sqsAddress['QueueUrl']
 
-                    client.delete_message(QueueUrl=msgUrl,
-                                          ReceiptHandle=record["receiptHandle"])
+                    client.delete_message(
+                        QueueUrl=msgUrl,
+                        ReceiptHandle=record["receiptHandle"])
 
 
 def queryByKey(key):

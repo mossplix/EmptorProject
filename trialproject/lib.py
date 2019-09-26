@@ -3,13 +3,12 @@
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import boto3
-import json
 import uuid
 import requests
 import os
 from botocore.exceptions import ClientError
 
-from boto3.dynamodb.conditions import Key, Attr
+from boto3.dynamodb.conditions import Key
 from boto3 import resource
 
 
@@ -30,10 +29,15 @@ class DynamoRepository:
         [toret] = response.get('Items')
         return toret
 
-    def put_item(self, key, title="None", url="None", s3Url="None", state="PENDING"):
+    def put_item(self,
+                 key,
+                 title="None",
+                 url="None",
+                 s3Url="None",
+                 state="PENDING"):
 
         try:
-            response = self.table.put_item(
+            self.table.put_item(
                 Item={'id': key,
                       'title': title,
                       'url': url,
@@ -112,4 +116,6 @@ def process_url(url):
     key = get_key()
     title = get_title(content)
     s3bucket_put(key, title, bucket)
-    return {"title": title, "s3url": get_s3object_url(bucket, key), "state": "PROCESSED"}
+    return {"title": title,
+            "s3url": get_s3object_url(bucket, key),
+            "state": "PROCESSED"}
