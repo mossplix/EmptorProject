@@ -8,7 +8,7 @@ chardet==3.0.4
 coverage==4.5.4
 docutils==0.15.2
 entrypoints==0.3
-flake8==3.7.8
+flake8==3.7.9
 idna==2.8
 importlib-metadata==0.23
 jmespath==0.9.4
